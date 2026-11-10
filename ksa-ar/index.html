@@ -37,7 +37,15 @@ header{height:68px;flex-shrink:0;display:flex;align-items:center;justify-content
 .tool.label{display:flex;align-items:center;gap:6px;padding:0 10px;font-size:11px;font-weight:800;white-space:nowrap}
 .tool.primary{background:linear-gradient(135deg,#dfbd79,#a87c3c);color:#17231b;border:0}
 .tool.active{border-color:var(--gold);color:var(--gold);background:#d9b56d20}
-.credit{text-align:center;color:#e7d6b5;font-size:10px;line-height:1.75;margin-top:9px}
+
+.lesson{margin-top:9px;border:1px solid #d9b56d4d;border-radius:12px;background:#d9b56d0d;color:#f0e6d1;max-height:28vh;overflow:auto}
+.lesson summary{cursor:pointer;list-style:none;padding:9px 12px;font-size:11px;font-weight:900;color:#e9d19f}
+.lesson summary::-webkit-details-marker{display:none}
+.lessonBody{padding:0 13px 11px;font-size:11px;line-height:1.8;color:#e0e3d9}
+.lessonBody h4{font-size:11px;color:#e8ce93;margin:7px 0 3px}
+.lessonBody p{margin:4px 0 7px}
+.lessonBody ul{margin:4px 0;padding-right:18px}
+\n.credit{text-align:center;color:#e7d6b5;font-size:10px;line-height:1.75;margin-top:9px}
 .credit strong{color:#f5e5c2;font-weight:800}
 .note{text-align:center;color:#91a89c;font-size:9px;margin-top:5px}
 .modal{display:none;position:absolute;inset:0;z-index:5;background:#03120feF;align-items:center;justify-content:center;padding:24px;text-align:center}
@@ -78,6 +86,18 @@ header{height:68px;flex-shrink:0;display:flex;align-items:center;justify-content
   </div>
  </div>
  <div style="display:flex;justify-content:center;gap:5px;margin-top:6px;direction:ltr"><span style="font-size:10px;color:#d9b56d;align-self:center">XYZ</span><button class="tool" id="ax-" style="height:27px;min-width:32px;font-size:10px">X−</button><button class="tool" id="ax+" style="height:27px;min-width:32px;font-size:10px">X+</button><button class="tool" id="ay-" style="height:27px;min-width:32px;font-size:10px">Y−</button><button class="tool" id="ay+" style="height:27px;min-width:32px;font-size:10px">Y+</button><button class="tool" id="az-" style="height:27px;min-width:32px;font-size:10px">Z−</button><button class="tool" id="az+" style="height:27px;min-width:32px;font-size:10px">Z+</button></div>
+<details class="lesson">
+  <summary>📖 شرح الدرس: الموقع والحدود</summary>
+  <div class="lessonBody">
+   <p>تقع المملكة العربية السعودية في الجنوب الغربي لقارة آسيا، وتشغل معظم مساحة شبه الجزيرة العربية التي تربط بين ثلاث قارات: آسيا وأفريقيا وأوروبا.</p>
+   <h4>ما أهمية موقع وطني المملكة العربية السعودية؟</h4>
+   <ul>
+    <li>يضم الموقع قبلة المسلمين.</li>
+    <li>يربط الموقع بين قارات متعددة.</li>
+    <li>يتوسط الموقع دول العالم.</li>
+   </ul>
+  </div>
+ </details>
  <div class="credit"><strong>إعداد المعلمة/ عزة ثابت المحمادي</strong><br>المدرسة: الثانية والسبعين الابتدائية</div>
  <div class="note" id="status">اختر مدينة لاستكشاف معالمها، أو فعّل تحريك المعالم واسحبها</div>
 </section>
@@ -88,7 +108,7 @@ header{height:68px;flex-shrink:0;display:flex;align-items:center;justify-content
 const canvas=document.getElementById('sceneCanvas'),ctx=canvas.getContext('2d',{alpha:true});
 const stage=document.getElementById('stage'),video=document.getElementById('cameraFeed'),status=document.getElementById('status');
 const modal=document.getElementById('modal'),modalText=document.getElementById('modalText');
-let W=0,H=0,dpr=1,zoom=1,rotation=0,offsetX=0,offsetY=0,moveMode=false,dragging=null,lastX=0,lastY=0,pointers=new Map(),pinchStart=0,pinchZoom=1,stream=null;
+let W=0,H=0,dpr=1,zoom=1,offsetX=0,offsetY=0,moveX=0,moveY=0,moveZ=0,moveMode=false,dragging=null,lastX=0,lastY=0,pointers=new Map(),pinchStart=0,pinchZoom=1,stream=null;
 const initial={makkah:{x:-1.55,y:1.20},madinah:{x:-1.95,y:-.25},riyadh:{x:.55,y:-.55}};
 const cities={
  makkah:{name:'مكة المكرمة',sub:'الكعبة المشرفة',x:-1.55,y:1.20,color:'#e5bd69'},
@@ -97,9 +117,16 @@ const cities={
 };
 function resize(){const r=stage.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);draw();}
 new ResizeObserver(resize).observe(stage);window.addEventListener('orientationchange',()=>setTimeout(resize,200));
-const outline=[[-4.56,-2.565],[-4.605,-2.205],[-4.71,-1.92],[-4.5,-1.95],[-4.41,-1.86],[-4.17,-1.425],[-3.795,-0.9],[-3.78,-0.795],[-3.6,-0.63],[-3.525,-0.48],[-3.555,-0.3],[-3.435,-0.075],[-3.15,0.045],[-2.91,0.33],[-2.7,0.81],[-2.76,1.11],[-2.685,1.245],[-2.7,1.41],[-2.64,1.545],[-2.43,1.815],[-2.25,2.07],[-2.01,2.28],[-1.845,2.37],[-1.77,2.535],[-1.575,2.685],[-1.425,2.895],[-1.32,3.075],[-1.14,3.24],[-0.975,3.405],[-0.81,3.585],[-0.63,3.765],[-0.45,3.9],[-0.27,3.99],[-0.09,4.02],[0.105,3.885],[0.255,3.585],[0.435,3.435],[0.705,3.465],[1.02,3.585],[1.335,3.72],[1.62,3.78],[1.95,3.69],[2.265,3.54],[2.61,3.36],[2.94,3.15],[3.24,2.925],[3.525,2.64],[3.765,2.25],[3.915,1.815],[4.2,1.41],[4.425,1.035],[4.59,0.645],[4.71,0.255],[4.665,-0.09],[4.455,-0.405],[4.2,-0.705],[3.96,-0.99],[3.675,-1.29],[3.465,-1.56],[3.285,-1.83],[3.045,-2.1],[2.745,-2.385],[2.475,-2.655],[2.205,-2.925],[1.95,-3.195],[1.65,-3.45],[1.335,-3.645],[1.005,-3.87],[0.675,-3.945],[0.36,-4.02],[0.06,-3.87],[-0.24,-3.66],[-0.495,-3.405],[-0.78,-3.18],[-1.08,-3],[-1.425,-2.94],[-1.8,-3.015],[-2.145,-3.21],[-2.505,-3.39],[-2.835,-3.51],[-3.15,-3.45],[-3.42,-3.255],[-3.69,-3.015],[-3.96,-2.895],[-4.23,-2.94],[-4.455,-2.76]];
-let rotX=.85,rotY=-.15,rotZ=0,mapZ=0;
-function project(x,y,z=0){let X=x,Y=y,Z=z;let c=Math.cos(rotX),s=Math.sin(rotX);[Y,Z]=[Y*c-Z*s,Y*s+Z*c];c=Math.cos(rotY);s=Math.sin(rotY);[X,Z]=[X*c+Z*s,-X*s+Z*c];c=Math.cos(rotZ),s=Math.sin(rotZ);[X,Y]=[X*c-Y*s,X*s+Y*c];Z+=mapZ;const scale=Math.min(W,H)*.095*zoom,per=5/(5-Z);return {x:W/2+offsetX+X*scale*per,y:H*.49+offsetY+Y*scale*per};}
+const outline=[[-4.545,-2.587],[-4.575,-2.527],[-4.575,-2.438],[-4.605,-2.362],[-4.605,-2.183],[-4.665,-2.018],[-4.710,-1.972],[-4.710,-1.927],[-4.680,-1.958],[-4.485,-1.958],[-4.365,-1.807],[-4.290,-1.627],[-4.200,-1.522],[-4.170,-1.448],[-4.110,-1.387],[-4.065,-1.297],[-3.975,-1.222],[-3.870,-0.967],[-3.780,-0.892],[-3.765,-0.787],[-3.720,-0.787],[-3.615,-0.667],[-3.600,-0.593],[-3.525,-0.487],[-3.525,-0.367],[-3.555,-0.323],[-3.450,-0.172],[-3.435,-0.098],[-3.390,-0.052],[-3.315,-0.068],[-3.240,0.007],[-3.165,0.022],[-3.120,0.052],[-2.970,0.217],[-2.895,0.352],[-2.880,0.443],[-2.790,0.578],[-2.790,0.637],[-2.700,0.772],[-2.760,1.012],[-2.760,1.087],[-2.670,1.267],[-2.700,1.387],[-2.625,1.552],[-2.550,1.613],[-2.550,1.642],[-2.520,1.657],[-2.460,1.777],[-2.355,1.853],[-2.265,1.853],[-2.190,1.927],[-2.085,1.987],[-1.995,2.092],[-1.950,2.107],[-1.935,2.152],[-1.950,2.167],[-1.860,2.272],[-1.845,2.347],[-1.785,2.438],[-1.785,2.512],[-1.755,2.542],[-1.755,2.603],[-1.680,2.677],[-1.590,2.902],[-1.500,3.007],[-1.440,3.022],[-1.260,3.188],[-1.245,3.322],[-1.185,3.367],[-1.155,3.458],[-1.095,3.502],[-1.080,3.623],[-1.050,3.667],[-0.975,3.652],[-0.915,3.592],[-0.915,3.562],[-0.870,3.532],[-0.870,3.472],[-0.900,3.442],[-0.900,3.353],[-0.870,3.248],[-0.810,3.172],[-0.720,3.157],[-0.555,3.248],[-0.495,3.248],[-0.360,3.188],[-0.285,3.202],[-0.180,3.262],[0.510,3.547],[0.540,3.607],[0.540,4.013],[0.555,4.013],[1.635,2.797],[1.755,2.782],[1.935,2.722],[1.995,2.722],[2.190,2.663],[2.505,2.603],[2.565,2.572],[2.700,2.558],[2.760,2.527],[3.060,2.467],[3.540,2.302],[3.585,2.272],[3.630,2.272],[4.020,2.123],[4.365,2.018],[4.425,1.972],[4.545,1.537],[4.695,1.117],[4.695,1.027],[4.500,0.713],[4.485,0.727],[4.350,0.727],[4.230,0.698],[4.095,0.698],[4.080,0.682],[3.975,0.682],[3.960,0.667],[3.600,0.637],[3.585,0.622],[3.330,0.593],[2.865,0.007],[2.865,-0.052],[2.835,-0.082],[2.790,-0.068],[2.745,-0.082],[2.745,-0.142],[2.835,-0.217],[2.820,-0.232],[2.775,-0.217],[2.730,-0.232],[2.685,-0.202],[2.610,-0.202],[2.490,-0.323],[2.460,-0.412],[2.400,-0.487],[2.385,-0.622],[2.340,-0.637],[2.265,-0.727],[2.265,-0.772],[2.160,-0.953],[2.190,-0.982],[2.235,-0.967],[2.265,-0.997],[2.265,-1.073],[2.175,-1.177],[2.160,-1.238],[2.175,-1.267],[2.205,-1.267],[2.145,-1.327],[2.085,-1.343],[1.980,-1.478],[1.920,-1.462],[1.860,-1.522],[1.815,-1.597],[1.830,-1.627],[1.860,-1.627],[1.845,-1.672],[1.770,-1.672],[1.740,-1.702],[1.680,-1.702],[1.635,-1.747],[1.620,-1.792],[1.650,-1.837],[1.545,-1.958],[1.515,-2.032],[1.515,-2.137],[1.470,-2.167],[1.155,-2.167],[1.125,-2.183],[1.080,-2.257],[1.065,-2.347],[1.020,-2.407],[0.825,-2.422],[0.720,-2.453],[0.435,-2.438],[0.420,-2.453],[0.255,-2.453],[0.240,-2.467],[-0.180,-2.498],[-1.380,-3.502],[-1.665,-3.623],[-2.115,-3.922],[-2.580,-4.027],[-2.640,-4.027],[-2.745,-3.938],[-3.255,-3.817],[-3.630,-3.697],[-3.630,-3.667],[-3.210,-3.202],[-3.210,-3.172],[-3.345,-3.083],[-3.345,-3.052],[-3.435,-2.902],[-3.750,-2.842],[-3.840,-2.677],[-4.050,-2.498],[-4.395,-2.572]];
+let rotX=.42,rotY=-.08,rotZ=0;
+function project(x,y,z=0){
+ let X=x+moveX,Y=y+moveY,Z=z+moveZ;
+ let c=Math.cos(rotX),s=Math.sin(rotX);[Y,Z]=[Y*c-Z*s,Y*s+Z*c];
+ c=Math.cos(rotY);s=Math.sin(rotY);[X,Z]=[X*c+Z*s,-X*s+Z*c];
+ c=Math.cos(rotZ);s=Math.sin(rotZ);[X,Y]=[X*c-Y*s,X*s+Y*c];
+ const scale=Math.min(W,H)*.095*zoom,per=5/(5-Z);
+ return {x:W/2+offsetX+X*scale*per,y:H*.49+offsetY+Y*scale*per};
+}
 function pathPolygon(points,dx=0,dy=0,z=0){ctx.beginPath();points.forEach((p,i)=>{const q=project(p[0],p[1],z);if(i===0)ctx.moveTo(q.x+dx,q.y+dy);else ctx.lineTo(q.x+dx,q.y+dy);});ctx.closePath();}
 function roundedLabel(x,y,main,sub){ctx.save();ctx.font='bold 13px system-ui,Arial';const width=Math.max(ctx.measureText(main).width,ctx.measureText(sub).width)+24;ctx.fillStyle='rgba(4,27,22,.92)';ctx.strokeStyle='rgba(221,184,108,.9)';ctx.lineWidth=1;roundRect(ctx,x-width/2,y-3,width,42,9);ctx.fill();ctx.stroke();ctx.textAlign='center';ctx.direction='rtl';ctx.fillStyle='#f6e7c4';ctx.fillText(main,x,y+13);ctx.font='bold 10px system-ui,Arial';ctx.fillStyle='#d9b56d';ctx.fillText(sub,x,y+28);ctx.restore();}
 function roundRect(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);}
@@ -153,9 +180,27 @@ function draw(){
  const center=project(0,0);const glow=ctx.createRadialGradient(center.x,center.y,10,center.x,center.y,Math.min(W,H)*.42);glow.addColorStop(0,'rgba(255,220,150,.09)');glow.addColorStop(1,'rgba(255,220,150,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
 }
 function cityAt(x,y){let found=null,best=42;Object.entries(cities).forEach(([id,c])=>{const p=project(c.x,c.y);const dist=Math.hypot(p.x-x,p.y-y);if(dist<best){best=dist;found=id;}});return found;}
-function inverseProject(x,y){const a=-rotation,dx=(x-W/2-offsetX)/zoom,dy=(y-H*.49-offsetY)/zoom;return {x:dx*Math.cos(a)-dy*Math.sin(a),y:dx*Math.sin(a)+dy*Math.cos(a)};}
+function inverseProject(sx,sy,zPlane=.12){
+ const scale=Math.min(W,H)*.095*zoom;
+ const screenX=(sx-W/2-offsetX)/scale,screenY=(sy-H*.49-offsetY)/scale;
+ let Xr=screenX,Yr=screenY,Zr=0,k=1;
+ for(let i=0;i<6;i++){
+  Xr=screenX/k;Yr=screenY/k;
+  const x1=Xr*Math.cos(rotZ)+Yr*Math.sin(rotZ);
+  const y1=-Xr*Math.sin(rotZ)+Yr*Math.cos(rotZ);
+  const zBase=-y1*Math.sin(rotX)+x1*Math.sin(rotY)*Math.cos(rotX);
+  Zr=(zPlane+moveZ-zBase)/(Math.cos(rotY)*Math.cos(rotX));
+  k=5/(5-Zr);
+ }
+ const x1=Xr*Math.cos(rotZ)+Yr*Math.sin(rotZ);
+ const y1=-Xr*Math.sin(rotZ)+Yr*Math.cos(rotZ);
+ const worldX=x1*Math.cos(rotY)-Zr*Math.sin(rotY);
+ const z2=x1*Math.sin(rotY)+Zr*Math.cos(rotY);
+ const worldY=y1*Math.cos(rotX)+z2*Math.sin(rotX);
+ return {x:worldX-moveX,y:worldY-moveY};
+}
 canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){const ps=[...pointers.values()];pinchStart=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y);pinchZoom=zoom;dragging=null;return;}lastX=e.clientX;lastY=e.clientY;if(moveMode){const r=canvas.getBoundingClientRect();dragging=cityAt(e.clientX-r.left,e.clientY-r.top);if(dragging)status.textContent='اسحب المعلم إلى المكان الجديد';}});
-canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){const ps=[...pointers.values()];const dist=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y);if(pinchStart>0)zoom=Math.max(.55,Math.min(1.8,pinchZoom*dist/pinchStart));draw();return;}if(dragging&&moveMode){const r=canvas.getBoundingClientRect(),p=inverseProject(e.clientX-r.left,e.clientY-r.top);cities[dragging].x=p.x;cities[dragging].y=p.y;draw();}else if(!moveMode){const dx=e.clientX-lastX;rotY+=dx*.006;rotX=Math.max(.1,Math.min(2.9,rotX+dy*.006));draw();}lastX=e.clientX;lastY=e.clientY;});
+canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){const ps=[...pointers.values()];const dist=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y);if(pinchStart>0)zoom=Math.max(.55,Math.min(1.8,pinchZoom*dist/pinchStart));draw();return;}const dx=e.clientX-lastX,dy=e.clientY-lastY;if(dragging&&moveMode){const r=canvas.getBoundingClientRect(),p=inverseProject(e.clientX-r.left,e.clientY-r.top);cities[dragging].x=p.x;cities[dragging].y=p.y;draw();}else if(!moveMode){rotY+=dx*.005;rotX=Math.max(-1.15,Math.min(1.15,rotX+dy*.005));draw();}lastX=e.clientX;lastY=e.clientY;});
 function pointerEnd(e){pointers.delete(e.pointerId);if(!pointers.size){dragging=null;pinchStart=0;}}
 canvas.addEventListener('pointerup',pointerEnd);canvas.addEventListener('pointercancel',pointerEnd);
 function focusCity(id){const c=cities[id];document.querySelectorAll('.city').forEach(b=>b.classList.toggle('active',b.dataset.city===id));offsetX=-c.x*zoom*.48;offsetY=-c.y*zoom*.48;status.textContent=c.name+' · '+c.sub;draw();}
@@ -164,8 +209,8 @@ document.getElementById('zoomIn').addEventListener('click',()=>{zoom=Math.min(1.
 document.getElementById('zoomOut').addEventListener('click',()=>{zoom=Math.max(.55,zoom/1.15);draw();});
 document.getElementById('rotateLeft').addEventListener('click',()=>{rotY-=Math.PI/12;draw();});
 document.getElementById('rotateRight').addEventListener('click',()=>{rotY+=Math.PI/12;draw();});
-document.getElementById('ax-').addEventListener('click',()=>{offsetX-=14;draw();});document.getElementById('ax+').addEventListener('click',()=>{offsetX+=14;draw();});document.getElementById('ay-').addEventListener('click',()=>{offsetY-=14;draw();});document.getElementById('ay+').addEventListener('click',()=>{offsetY+=14;draw();});document.getElementById('az-').addEventListener('click',()=>{mapZ=Math.max(-1.2,mapZ-.12);draw();});document.getElementById('az+').addEventListener('click',()=>{mapZ=Math.min(1.2,mapZ+.12);draw();});document.getElementById('moveBtn').addEventListener('click',e=>{moveMode=!moveMode;e.currentTarget.classList.toggle('active',moveMode);status.textContent=moveMode?'وضع التحريك: اسحب أي معلم بإصبعك':'وضع التدوير: اسحب الخريطة بإصبعك';});
-document.getElementById('resetBtn').addEventListener('click',()=>{zoom=1;rotX=.85;rotY=-.15;rotZ=0;mapZ=0;offsetX=0;offsetY=0;Object.keys(initial).forEach(k=>Object.assign(cities[k],initial[k]));moveMode=false;document.getElementById('moveBtn').classList.remove('active');document.querySelectorAll('.city').forEach(b=>b.classList.remove('active'));status.textContent='تمت إعادة الخريطة إلى وضعها الأصلي';draw();});
+document.getElementById('ax-').addEventListener('click',()=>{moveX=Math.max(-3,moveX-.2);draw();});document.getElementById('ax+').addEventListener('click',()=>{moveX=Math.min(3,moveX+.2);draw();});document.getElementById('ay-').addEventListener('click',()=>{moveY=Math.max(-3,moveY-.2);draw();});document.getElementById('ay+').addEventListener('click',()=>{moveY=Math.min(3,moveY+.2);draw();});document.getElementById('az-').addEventListener('click',()=>{moveZ=Math.max(-1.2,moveZ-.12);draw();});document.getElementById('az+').addEventListener('click',()=>{moveZ=Math.min(1.2,moveZ+.12);draw();});document.getElementById('moveBtn').addEventListener('click',e=>{moveMode=!moveMode;e.currentTarget.classList.toggle('active',moveMode);status.textContent=moveMode?'وضع التحريك: اسحب أي معلم بإصبعك':'وضع التدوير: اسحب الخريطة بإصبعك';});
+document.getElementById('resetBtn').addEventListener('click',()=>{zoom=1;rotX=.42;rotY=-.08;rotZ=0;moveX=0;moveY=0;moveZ=0;offsetX=0;offsetY=0;Object.keys(initial).forEach(k=>Object.assign(cities[k],initial[k]));moveMode=false;document.getElementById('moveBtn').classList.remove('active');document.querySelectorAll('.city').forEach(b=>b.classList.remove('active'));status.textContent='تمت إعادة الخريطة إلى وضعها الأصلي';draw();});
 async function startCamera(){
  try{
   if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('افتح الرابط في Safari أو Chrome مباشرة، وليس داخل نافذة معاينة؛ يلزم اتصال HTTPS للسماح بالكاميرا.');
