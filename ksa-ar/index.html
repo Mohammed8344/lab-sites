@@ -92,14 +92,15 @@ let W=0,H=0,dpr=1,zoom=1,rotation=0,offsetX=0,offsetY=0,moveMode=false,dragging=
 const initial={makkah:{x:-105,y:35},madinah:{x:-69,y:-57},riyadh:{x:47,y:-46}};
 const cities={
  makkah:{name:'مكة المكرمة',sub:'الكعبة المشرفة',x:-1.55,y:1.20,color:'#e5bd69'},
- madinah:{name:'المدينة المنورة',sub:'المسجد النبوي',x:-69,y:-57,color:'#c4d9a9'},
- riyadh:{name:'الرياض',sub:'برج المملكة',x:47,y:-46,color:'#94d4ba'}
+ madinah:{name:'المدينة المنورة',sub:'المسجد النبوي',x:-1.95,y:-.25,color:'#c4d9a9'},
+ riyadh:{name:'الرياض',sub:'برج المملكة',x:.55,y:-.55,color:'#94d4ba'}
 };
 function resize(){const r=stage.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);draw();}
 new ResizeObserver(resize).observe(stage);window.addEventListener('orientationchange',()=>setTimeout(resize,200));
 const outline=[[-4.56,-2.565],[-4.605,-2.205],[-4.71,-1.92],[-4.5,-1.95],[-4.41,-1.86],[-4.17,-1.425],[-3.795,-0.9],[-3.78,-0.795],[-3.6,-0.63],[-3.525,-0.48],[-3.555,-0.3],[-3.435,-0.075],[-3.15,0.045],[-2.91,0.33],[-2.7,0.81],[-2.76,1.11],[-2.685,1.245],[-2.7,1.41],[-2.64,1.545],[-2.43,1.815],[-2.25,2.07],[-2.01,2.28],[-1.845,2.37],[-1.77,2.535],[-1.575,2.685],[-1.425,2.895],[-1.32,3.075],[-1.14,3.24],[-0.975,3.405],[-0.81,3.585],[-0.63,3.765],[-0.45,3.9],[-0.27,3.99],[-0.09,4.02],[0.105,3.885],[0.255,3.585],[0.435,3.435],[0.705,3.465],[1.02,3.585],[1.335,3.72],[1.62,3.78],[1.95,3.69],[2.265,3.54],[2.61,3.36],[2.94,3.15],[3.24,2.925],[3.525,2.64],[3.765,2.25],[3.915,1.815],[4.2,1.41],[4.425,1.035],[4.59,0.645],[4.71,0.255],[4.665,-0.09],[4.455,-0.405],[4.2,-0.705],[3.96,-0.99],[3.675,-1.29],[3.465,-1.56],[3.285,-1.83],[3.045,-2.1],[2.745,-2.385],[2.475,-2.655],[2.205,-2.925],[1.95,-3.195],[1.65,-3.45],[1.335,-3.645],[1.005,-3.87],[0.675,-3.945],[0.36,-4.02],[0.06,-3.87],[-0.24,-3.66],[-0.495,-3.405],[-0.78,-3.18],[-1.08,-3],[-1.425,-2.94],[-1.8,-3.015],[-2.145,-3.21],[-2.505,-3.39],[-2.835,-3.51],[-3.15,-3.45],[-3.42,-3.255],[-3.69,-3.015],[-3.96,-2.895],[-4.23,-2.94],[-4.455,-2.76]];
 let rotX=.85,rotY=-.15,rotZ=0;
-function project(x,y,z=0){let X=x,Y=y,Z=z;let c=Math.cos(rotX),s=Math.sin(rotX);[Y,Z]=[Y*c-Z*s,Y*s+Z*c];c=Math.cos(rotY);s=Math.sin(rotY);[X,Z]=[X*c+Z*s,-X*s+Z*c];c=Math.cos(rotZ),s=Math.sin(rotZ);[X,Y]=[X*c-Y*s,X*s+Y*c];const scale=Math.min(W,H)*.34*zoom,per=5/(5-Z);return {x:W/2+offsetX+X*scale*per,y:H*.49+offsetY+Y*scale*per};}
+let rotX=.85,rotY=-.15,rotZ=0;
+function project(x,y,z=0){let X=x,Y=y,Z=z;let c=Math.cos(rotX),s=Math.sin(rotX);[Y,Z]=[Y*c-Z*s,Y*s+Z*c];c=Math.cos(rotY);s=Math.sin(rotY);[X,Z]=[X*c+Z*s,-X*s+Z*c];c=Math.cos(rotZ),s=Math.sin(rotZ);[X,Y]=[X*c-Y*s,X*s+Y*c];const scale=Math.min(W,H)*.095*zoom,per=5/(5-Z);return {x:W/2+offsetX+X*scale*per,y:H*.49+offsetY+Y*scale*per};}
 function pathPolygon(points,dx=0,dy=0,z=0){ctx.beginPath();points.forEach((p,i)=>{const q=project(p[0],p[1],z);if(i===0)ctx.moveTo(q.x+dx,q.y+dy);else ctx.lineTo(q.x+dx,q.y+dy);});ctx.closePath();}
 function roundedLabel(x,y,main,sub){ctx.save();ctx.font='bold 13px system-ui,Arial';const width=Math.max(ctx.measureText(main).width,ctx.measureText(sub).width)+24;ctx.fillStyle='rgba(4,27,22,.92)';ctx.strokeStyle='rgba(221,184,108,.9)';ctx.lineWidth=1;roundRect(ctx,x-width/2,y-3,width,42,9);ctx.fill();ctx.stroke();ctx.textAlign='center';ctx.direction='rtl';ctx.fillStyle='#f6e7c4';ctx.fillText(main,x,y+13);ctx.font='bold 10px system-ui,Arial';ctx.fillStyle='#d9b56d';ctx.fillText(sub,x,y+28);ctx.restore();}
 function roundRect(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);}
@@ -132,13 +133,13 @@ function draw(){
  if(!stage.classList.contains('camera-on')){const bg=ctx.createRadialGradient(W*.5,H*.48,5,W*.5,H*.48,Math.max(W,H)*.7);bg.addColorStop(0,'rgba(31,100,77,.1)');bg.addColorStop(1,'rgba(0,0,0,0)');ctx.clearRect(0,0,W,H);ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);}
  else ctx.clearRect(0,0,W,H);
  // map extrusion, top surface and border
- pathPolygon(outline,0,15);ctx.fillStyle='rgba(0,0,0,.35)';ctx.fill();
- pathPolygon(outline,0,8);ctx.fillStyle='#8d7147';ctx.fill();
- pathPolygon(outline);const mapGrad=ctx.createLinearGradient(W*.25,H*.2,W*.78,H*.85);mapGrad.addColorStop(0,'#e8d4aa');mapGrad.addColorStop(.55,'#cdb486');mapGrad.addColorStop(1,'#a58b5c');ctx.fillStyle=mapGrad;ctx.fill();
+ pathPolygon(outline,0,0,-.35);ctx.fillStyle='#777b70';ctx.fill();
+ pathPolygon(outline,0,0,-.16);ctx.fillStyle='#064b2e';ctx.fill();
+ pathPolygon(outline);const mapGrad=ctx.createLinearGradient(W*.25,H*.2,W*.78,H*.85);mapGrad.addColorStop(0,'#087142');mapGrad.addColorStop(.55,'#006638');mapGrad.addColorStop(1,'#00552f');ctx.fillStyle=mapGrad;ctx.fill();
  pathPolygon(outline);ctx.strokeStyle='#f0d18f';ctx.lineWidth=2;ctx.stroke();
  // subtle geographic contour lines
  ctx.save();ctx.globalAlpha=.15;ctx.strokeStyle='#806b48';ctx.lineWidth=1;
- for(let j=0;j<5;j++){const p=project(-80+j*28,-20+j*8);ctx.beginPath();ctx.ellipse(p.x,p.y,18+j*5,8+j*3,-.4,0,Math.PI*2);ctx.stroke();}ctx.restore();
+ for(let j=0;j<0;j++){const p=project(j,j);ctx.beginPath();ctx.ellipse(p.x,p.y,18,8,-.4,0,Math.PI*2);ctx.stroke();}ctx.restore();
  // place models in map coordinates
  Object.entries(cities).forEach(([id,c])=>{
   const p=project(c.x,c.y,.12);
@@ -165,7 +166,7 @@ document.getElementById('zoomOut').addEventListener('click',()=>{zoom=Math.max(.
 document.getElementById('rotateLeft').addEventListener('click',()=>{rotY-=Math.PI/12;draw();});
 document.getElementById('rotateRight').addEventListener('click',()=>{rotY+=Math.PI/12;draw();});
 document.getElementById('ax-').addEventListener('click',()=>{rotX-=.15;draw();});document.getElementById('ax+').addEventListener('click',()=>{rotX+=.15;draw();});document.getElementById('ay-').addEventListener('click',()=>{rotY-=.15;draw();});document.getElementById('ay+').addEventListener('click',()=>{rotY+=.15;draw();});document.getElementById('az-').addEventListener('click',()=>{rotZ-=.15;draw();});document.getElementById('az+').addEventListener('click',()=>{rotZ+=.15;draw();});document.getElementById('moveBtn').addEventListener('click',e=>{moveMode=!moveMode;e.currentTarget.classList.toggle('active',moveMode);status.textContent=moveMode?'وضع التحريك: اسحب أي معلم بإصبعك':'وضع التدوير: اسحب الخريطة بإصبعك';});
-document.getElementById('resetBtn').addEventListener('click',()=>{zoom=1;rotation=0;rotX=.85;rotY=-.15;rotZ=0;offsetX=0;offsetY=0;Object.keys(initial).forEach(k=>Object.assign(cities[k],initial[k]));moveMode=false;document.getElementById('moveBtn').classList.remove('active');document.querySelectorAll('.city').forEach(b=>b.classList.remove('active'));status.textContent='تمت إعادة الخريطة إلى وضعها الأصلي';draw();});
+document.getElementById('resetBtn').addEventListener('click',()=>{zoom=1;rotX=.85;rotY=-.15;rotZ=0;offsetX=0;offsetY=0;Object.keys(initial).forEach(k=>Object.assign(cities[k],initial[k]));moveMode=false;document.getElementById('moveBtn').classList.remove('active');document.querySelectorAll('.city').forEach(b=>b.classList.remove('active'));status.textContent='تمت إعادة الخريطة إلى وضعها الأصلي';draw();});
 async function startCamera(){
  try{
   if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('افتح الرابط في Safari أو Chrome مباشرة، وليس داخل نافذة معاينة؛ يلزم اتصال HTTPS للسماح بالكاميرا.');
