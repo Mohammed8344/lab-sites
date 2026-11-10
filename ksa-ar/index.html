@@ -161,7 +161,7 @@ function makePlaque(main,sub){
  ctx.fillStyle='#d9b56d';ctx.font='bold 31px Tajawal, sans-serif';ctx.fillText(sub,320,129);
  const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
  const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
- spr.scale.set(2.35,.66,1);spr.position.set(0,3.5,0);return spr;
+ spr.scale.set(2.35,.66,1);spr.position.set(0,main==='الرياض'?5.0:3.5,0);return spr;
 }
 function addBase(root,color){
  const disc=new THREE.Mesh(new THREE.CylinderGeometry(.88,.95,.10,48),mat(0x254d3d,.48,.32));disc.position.y=.10;root.add(disc);
